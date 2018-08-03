@@ -11,42 +11,52 @@ import java.util.Scanner;
  *
  * @author nglaz
  */
-public class Street extends Property implements Landable{
+public class Street extends Property implements Landable {
 
     private int housePrice;
     private int houses;
     private int color;
+
     public Street(String name, int spot, int price, int[] rents, int mortgagePrice, int housePrice, int color) {
         super(name, spot, price, rents, mortgagePrice);
         this.housePrice = housePrice;
         this.houses = 0;
         this.color = color;
     }
-    
 
-    public boolean partOfMonopoly(Player owner){
-        if(owner.streetsOwned()[color] == MonopolyGame.monopolyNumbers.get(color)){
+    public boolean partOfMonopoly(Player owner) {
+        if (owner.streetsOwned()[color] == MonopolyGame.monopolyNumbers.get(color)) {
             return true;
         }
         return false;
     }
-    public int getColor(){
+
+    public int getColor() {
         return color;
     }
 
     @Override
     public int calculateRent(Player owner, Player renter) {
-        if(partOfMonopoly(owner)){
-            
+        if (partOfMonopoly(owner)) {
+
         }
         return getRents()[houses];
     }
 
+    public boolean buyHouses(int num) {
+        if (houses + num > 5) {
+            return false;
+        }
+        houses += num;
+        return true;
+    }
 
-
-
-  
-
-
+    public boolean sellHouses(int num) {
+        if (houses - num < 0) {
+            return false;
+        }
+        houses -= num;
+        return true;
+    }
 
 }
