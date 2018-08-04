@@ -50,8 +50,8 @@ public abstract class Property extends Space {
         if(mortgaged){
             return unmortgage(p);
         }
-        mortgage(p);
-        return true;
+        
+        return mortgage(p);
     }
     
     public boolean isMortgaged(){
@@ -60,9 +60,15 @@ public abstract class Property extends Space {
     public int getMortgagePrice(){
         return mortgagePrice;
     }
-    public void mortgage(Player p){
+    public boolean mortgage(Player p){
+        if(this instanceof Street){
+            if(((Street)this).houses() != 0){
+                return false;
+            }
+        }
         mortgaged = true;
         p.changeMoney(mortgagePrice);
+        return true;
     }
     public boolean unmortgage(Player p){
         if(p.changeMoney((int) (-mortgagePrice * 1.1))){
@@ -74,11 +80,10 @@ public abstract class Property extends Space {
     
     public abstract int calculateRent(Player owner, Player renter);
     public boolean payRent(Player owner, Player renter, int rent){
-        if(renter.money() < rent){
+        if(!renter.changeMoney(-rent)){
             return false;
         }
         owner.changeMoney(rent);
-        renter.changeMoney(-rent);
         System.out.println("You paid $" + rent + " to " + owner);
         return true;
     }

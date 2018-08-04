@@ -27,26 +27,29 @@ public class TurnMenu {
             for (Property prop : p.getProperties()) {
                 System.out.print(count + ": " + prop);
                 if (prop.isMortgaged()) {
-                    System.out.println(" is mortgaged. $" + Math.round(prop.getMortgagePrice() * 1.1) + " to unmortgage");
+                    System.out.print(" is mortgaged. $" + Math.round(prop.getMortgagePrice() * 1.1) + " to unmortgage");
                 } else if (prop instanceof Street) {
                     if (((Street) prop).houses() > 0) {
-                        System.out.println(" can't be mortgaged. Sell houses first.");
+                        System.out.print(" can't be mortgaged. Sell houses first.");
                     }
-                } else {
-                    System.out.println(" is not mortgaged. $" + prop.getMortgagePrice() + " to mortgage");
+                    else {
+                        System.out.print(" is not mortgaged. $" + prop.getMortgagePrice() + " to mortgage");
+                    }
+                } else if(!(prop instanceof Street)){
+                    System.out.print(" is not mortgaged. $" + prop.getMortgagePrice() + " to mortgage");
                 }
+                System.out.println("");
                 count++;
             }
             System.out.println(count + ": Exit");
             try {
                 int choice = Integer.parseInt(scan.nextLine());
                 if (choice == count) {
-                    scan.close();
                     return;
                 }
-                Property toggled = p.getProperties().get(choice);
+                Property toggled = p.getProperties().get(choice - 1);
                 if (!toggled.changeMortgage(p)) {
-                    System.out.println("You're too poor for that!");
+                    System.out.println("You can't do that.");
                 }
 
             } catch (IllegalArgumentException e) {
@@ -61,11 +64,13 @@ public class TurnMenu {
         ArrayList<Street> streets = new ArrayList<Street>();
         for (Property prop : p.getProperties()) {
             if (prop instanceof Street) {
-                streets.add((Street) prop);
+                if (p.ownsMonopoly(((Street) prop).color())) {
+                    streets.add((Street) prop);
+                }
             }
         }
         if (streets.isEmpty()) {
-            System.out.println("No streets to buy/sell houses on!");
+            System.out.println("No monopolies to buy/sell houses on!");
             return;
         }
         while (true) {
@@ -84,11 +89,13 @@ public class TurnMenu {
             try {
                 int choice = Integer.parseInt(scan.nextLine());
                 if (choice == count) {
-                    scan.close();
                     return;
                 }
                 Street chosen = streets.get(choice - 1);
                 while (true) {
+                    if(chosen.isMortgaged()){
+                        break;
+                    }
                     String h;
                     if (chosen.houses() == 5) {
                         h = "a hotel";
@@ -100,33 +107,34 @@ public class TurnMenu {
                     System.out.println(chosen + " has " + h);
                     System.out.println("You have $" + p.money());
                     if (chosen.houses() != 5) {
-                        System.out.println("1: buy a house for " + chosen.housePrice());
+                        System.out.println("1: buy a house for $" + chosen.housePrice());
                     }
                     if (chosen.houses() != 0) {
-                        System.out.println("2: sell a house for " + chosen.housePrice() / 2);
+                        System.out.println("2: sell a house for $" + chosen.housePrice() / 2);
                     }
                     System.out.println("3: Go back");
                     try {
                         choice = Integer.parseInt(scan.nextLine());
                         if (choice == count) {
-                            scan.close();
                             break;
                         }
                         if (choice == 1 && chosen.houses() != 5) {
-                            if(!chosen.buyHouse(p)){
+                            if (!chosen.buyHouse(p)) {
                                 System.out.println("You can't do that!");
                             }
-                        } else if(choice == 2 && chosen.houses() != 0){
-                            if(!chosen.sellHouse(p)){
+                        } else if (choice == 2 && chosen.houses() != 0) {
+                            if (!chosen.sellHouse(p)) {
                                 System.out.println("You can't do that!");
                             }
                         }
 
                     } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid choice.");
                     }
                 }
 
             } catch (IllegalArgumentException e) {
+                System.out.println("Invalid choice.");
             }
         }
     }

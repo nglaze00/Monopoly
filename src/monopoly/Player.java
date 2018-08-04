@@ -5,6 +5,7 @@
  */
 package monopoly;
 
+import static java.lang.System.in;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ public class Player implements Comparable<Player> {
     private HashMap<String, Property> properties;
     private int[] streetsOwned;
     private boolean bankrupt;
-    
+
     private boolean inJail;             //board stuff
     private int spot;
     private int lastRoll;
@@ -54,30 +55,35 @@ public class Player implements Comparable<Player> {
         properties.put(p.getName(), p);
         p.changeOwner(this);
         money -= p.getPrice();
-        if(p instanceof Street){
+        if (p instanceof Street) {
             streetsOwned()[((Street) p).getColor()]++;
         }
     }
-    public int[] streetsOwned(){
+
+    public int[] streetsOwned() {
         return streetsOwned;
     }
+
     public void move(int spot) {
         this.spot = spot;
     }
-    public int roll(Scanner scan){
+
+    public int roll(Scanner scan) {
         System.out.println(this + ", press enter to roll!");
         scan.nextLine();
         int roll = Roller.roll();
         lastRoll = roll;
         return roll;
     }
-    public int lastRoll(){
+
+    public int lastRoll() {
         return lastRoll;
     }
+
     public void advance(int spaces) {
-        
+
         spot = (spaces + spot) % 40;
-        
+
     }
 
     public int compareTo(Player compared) {
@@ -90,7 +96,7 @@ public class Player implements Comparable<Player> {
 
     public ArrayList<Property> getProperties() {
         ArrayList<Property> properties = new ArrayList<>();
-        for(Property prop : this.properties.values()){
+        for (Property prop : this.properties.values()) {
             properties.add(prop);
         }
         return properties;
@@ -119,15 +125,16 @@ public class Player implements Comparable<Player> {
     int money() {
         return money;
     }
-    boolean inJail(){
+
+    boolean inJail() {
         return inJail;
     }
 
     boolean changeMoney(int i) {
-        if(money + i < 0){
+        if (money + i < 0) {
             return false;
         }
-        money+=i;
+        money += i;
         return true;
     }
 
@@ -137,6 +144,26 @@ public class Player implements Comparable<Player> {
 
     void sellHouses() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    boolean ownsMonopoly(int color) {
+        int owned = 0;
+        for (Property p : properties.values()) {
+
+            if (p instanceof Street) {
+                if (((Street) p).color() == color) {
+                    owned++;
+                }
+            }
+        }
+        if (color == 0 || color == 7) {
+            if (owned == 2) {
+                return true;
+            }
+        } else if (owned == 3) {
+            return true;
+        }
+        return false;
     }
 
 }

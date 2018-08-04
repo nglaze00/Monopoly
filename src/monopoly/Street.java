@@ -24,12 +24,7 @@ public class Street extends Property implements Landable {
         this.color = color;
     }
 
-    public boolean partOfMonopoly(Player owner) {
-        if (owner.streetsOwned()[color] == MonopolyGame.monopolyNumbers.get(color)) {
-            return true;
-        }
-        return false;
-    }
+
 
     public int getColor() {
         return color;
@@ -40,11 +35,14 @@ public class Street extends Property implements Landable {
     public int housePrice(){
         return housePrice;
     }
+    public int color(){
+        return color;
+    }
 
     @Override
     public int calculateRent(Player owner, Player renter) {
-        if (partOfMonopoly(owner)) {
-
+        if(owner.ownsMonopoly(color) && houses == 0){
+            return getRents()[0] * 2;
         }
         return getRents()[houses];
     }

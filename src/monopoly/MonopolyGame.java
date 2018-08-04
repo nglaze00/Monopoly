@@ -33,7 +33,6 @@ class MonopolyGame {
         players = new ArrayList<>();
         spaces = new HashMap<>();
         spaceSpots = new ArrayList<>();
-        
         addMonopolyNumbers();
         addPlayers();
         try {
@@ -43,7 +42,8 @@ class MonopolyGame {
             System.out.println("setup file not found; quitting...");
             System.exit(0);
         }
-
+        players.get(0).buyProperty((Property)spaces.get("Mediterranean Ave."));
+        players.get(0).buyProperty((Property)spaces.get("Baltic Ave."));
         rollForTurnOrder();
     }
 
@@ -73,9 +73,9 @@ class MonopolyGame {
             System.out.println("\n" + p.getInfo());
             System.out.println("Do what?\n"
                     + "1. Trade\n"
-                    + "2. Mortgage menu\n"
+                    + "2. Mortgage/unmortgage properties\n"
                     + "3. Buy/sell houses\n"
-                    + "6. End turn");
+                    + "4. End turn");
             try {
                 switch (Integer.parseInt(scan.nextLine())) {
                     case 1:
@@ -87,7 +87,7 @@ class MonopolyGame {
                     case 3:
                         TurnMenu.houses(p);//implement
                         break;
-                    case 6:
+                    case 4:
                         return;
 
                 }
@@ -210,7 +210,7 @@ class MonopolyGame {
         System.out.println("Turn order: " + players);
     }
 
-    /*public void setTurnOrder() {
+    /*public void setTurnOrder() {                          ((obsolete))
         int first = Roller.whoGoesFirst(players.size());
         int i = first;
 
