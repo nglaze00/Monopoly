@@ -34,6 +34,12 @@ public class Street extends Property implements Landable {
     public int getColor() {
         return color;
     }
+    public int houses(){
+        return houses;
+    }
+    public int housePrice(){
+        return housePrice;
+    }
 
     @Override
     public int calculateRent(Player owner, Player renter) {
@@ -43,19 +49,21 @@ public class Street extends Property implements Landable {
         return getRents()[houses];
     }
 
-    public boolean buyHouses(int num) {
-        if (houses + num > 5) {
+    public boolean buyHouse(Player p) {
+        if (houses > 4 || p.money() < housePrice) {
             return false;
         }
-        houses += num;
+        houses += 1;
+        p.changeMoney(-housePrice);
         return true;
     }
 
-    public boolean sellHouses(int num) {
-        if (houses - num < 0) {
+    public boolean sellHouse(Player p) {
+        if (houses < 1) {
             return false;
         }
-        houses -= num;
+        houses -= 1;
+        p.changeMoney(housePrice / 2);
         return true;
     }
 

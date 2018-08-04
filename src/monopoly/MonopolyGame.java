@@ -74,8 +74,7 @@ class MonopolyGame {
             System.out.println("Do what?\n"
                     + "1. Trade\n"
                     + "2. Mortgage menu\n"
-                    + "4. Buy houses\n"
-                    + "5. Sell houses\n"
+                    + "3. Buy/sell houses\n"
                     + "6. End turn");
             try {
                 switch (Integer.parseInt(scan.nextLine())) {
@@ -83,13 +82,10 @@ class MonopolyGame {
                         //implement trading
                         break;
                     case 2:
-                        Mortgage.menu(p);
+                        TurnMenu.mortgage(p);
                         break;
-                    case 4:
-                        p.buyHouses();//implement
-                        break;
-                    case 5:
-                        p.sellHouses();//implement
+                    case 3:
+                        TurnMenu.houses(p);//implement
                         break;
                     case 6:
                         return;

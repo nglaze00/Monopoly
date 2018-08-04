@@ -103,7 +103,7 @@ public class Player implements Comparable<Player> {
 
     public String getInfo() {
         String s = "";
-        s += name + "'s turn. Money: " + getMoney() + "\n" + "Properties: ";
+        s += name + "'s turn. Money: " + money() + "\n" + "Properties: ";
 
         for (Property prop : getProperties()) {
             s += (prop + ", ");
@@ -116,15 +116,19 @@ public class Player implements Comparable<Player> {
         return spot;
     }
 
-    int getMoney() {
+    int money() {
         return money;
     }
     boolean inJail(){
         return inJail;
     }
 
-    void changeMoney(int i) {
+    boolean changeMoney(int i) {
+        if(money + i < 0){
+            return false;
+        }
         money+=i;
+        return true;
     }
 
     void buyHouses() {
