@@ -19,6 +19,7 @@ public class Go extends Space implements Landable {
 
     @Override
     public void landOn(Player p, Scanner scan) {
+    	System.out.println("You passed Go! Collect $200");
         p.changeMoney(200);
     }
 

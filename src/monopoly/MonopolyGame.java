@@ -21,216 +21,241 @@ import java.util.Scanner;
  */
 class MonopolyGame {
 
-    private ArrayList<Player> players;
-    private HashMap<String, Space> spaces;
-    private ArrayList<Space> spaceSpots;
-    private static Scanner io = new Scanner(System.in);
-    private static Scanner scan = new Scanner(System.in);
+	private ArrayList<Player> players;
+	private HashMap<String, Space> spaces;
+	private ArrayList<Space> spaceSpots;
+	private static Scanner io = new Scanner(System.in);
+	private static Scanner scan = new Scanner(System.in);
 
-    public static ArrayList<Integer> monopolyNumbers = new ArrayList<>();
+	private int jailSpot;
 
-    public MonopolyGame() {
-        players = new ArrayList<>();
-        spaces = new HashMap<>();
-        spaceSpots = new ArrayList<>();
-        addMonopolyNumbers();
-        addPlayers();
-        try {
-            addSpaces("assets/spaces.txt");
-            System.out.println("Game set up successfully!");
-        } catch (FileNotFoundException e) {
-            System.out.println("setup file not found; quitting...");
-            System.exit(0);
-        }
-        players.get(0).buyProperty((Property)spaces.get("Mediterranean Ave."));
-        players.get(0).buyProperty((Property)spaces.get("Baltic Ave."));
-        rollForTurnOrder();
-    }
+	public static ArrayList<Integer> monopolyNumbers = new ArrayList<>();
 
-    public void play() {
-        int whoseTurn = 0;
-        while (true) {
-            turn(whoseTurn);
-            if (whoseTurn / players.size() > 35) {                //turn limit
-                break;
-            }
-            whoseTurn++;
-        }
+	public MonopolyGame() {
+		players = new ArrayList<>();
+		spaces = new HashMap<>();
+		spaceSpots = new ArrayList<>();
+		jailSpot = -1;
+		addMonopolyNumbers();
+		addPlayers();
+		try {
+			addSpaces("assets/spaces.txt");
+			System.out.println("Game set up successfully!");
+		} catch (FileNotFoundException e) {
+			System.out.println("setup file not found; quitting...");
+			System.exit(0);
+		}
+		rollForTurnOrder();
+	}
 
-    }
+	public void play() {
+		int whoseTurn = 0;
+		while (true) {
+			turn(whoseTurn);
+			if (whoseTurn / players.size() > 35) { // turn limit
+				break;
+			}
+			whoseTurn++;
+		}
 
-    public void turn(int whoseTurn) {
-        Player p = players.get(whoseTurn % players.size());
+	}
 
-        System.out.println("\n" + p.getInfo());
-        p.advance(p.roll(scan));
-        Space space = spaceSpots.get(p.getSpot());
-        System.out.println(p + " rolled a " + p.lastRoll() + " and landed on " + space.getName());
+	public void turn(int whoseTurn) {
+		Player p = players.get(whoseTurn % players.size());
 
-        space.landOn(p, scan);
+		System.out.println("\n" + p.getInfo());
+		Space space = spaceSpots.get(p.getSpot());
+		if (p.inJail() != -1) {
+			space.landOn(p, scan);
+		}
+		if (p.inJail() == -1) {
+			int[] dice = p.roll(scan);
+			p.advance(dice[0] + dice[1]);
+			space = spaceSpots.get(p.getSpot());
+			if (dice[0] == dice[1]) {
+				p.rolledDoubles();
+			} else {
+				p.rolledDifferent();
+			}
+			if (p.doubles() == 3) {
+				System.out.println("You rolled doubles 3 times. Go to jail!");
+				p.rolledDifferent();
+				p.move(Jail.spot());
+				p.turnInJail();
+				return;
+			}
+			System.out.println(p + " rolled a " + p.lastRoll() + " and landed on " + space.getName());
 
-        while (true) {
-            System.out.println("\n" + p.getInfo());
-            System.out.println("Do what?\n"
-                    + "1. Trade\n"
-                    + "2. Mortgage/unmortgage properties\n"
-                    + "3. Buy/sell houses\n"
-                    + "4. End turn");
-            try {
-                switch (Integer.parseInt(scan.nextLine())) {
-                    case 1:
-                        //implement trading
-                        break;
-                    case 2:
-                        TurnMenu.mortgage(p);
-                        break;
-                    case 3:
-                        TurnMenu.houses(p);//implement
-                        break;
-                    case 4:
-                        return;
+			space.landOn(p, scan);
+		}
+		
 
-                }
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid choice.");
-            }
-        }
+		while (true) {
+			System.out.println("\n" + p.getInfo());
+			System.out.println("Do what?\n" + "1. Trade\n" + "2. Mortgage/unmortgage properties\n"
+					+ "3. Buy/sell houses\n" + "4. End turn");
+			try {
+				switch (Integer.parseInt(scan.nextLine())) {
+				case 1:
+					// implement trading
+					break;
+				case 2:
+					TurnMenu.mortgage(p);
+					break;
+				case 3:
+					TurnMenu.houses(p);// implement
+					break;
+				case 4:
+					return;
 
-    }
+				}
+			} catch (IllegalArgumentException e) {
+				System.out.println("Invalid choice.");
+			}
+		}
 
-    public void goBankrupt(Player p) {
-        //add stuff
-    }
+	}
 
-    public void addPlayers() {                  //add bank player
-        System.out.print("How many players? (max 4)");
-        int num = Integer.parseInt(scan.nextLine());
-        for (int i = 0; i < num; i++) {
-            addPlayer(scan);
-            if (i == 3) {
-                break;
-            }
-        }
-    }
+	public void goBankrupt(Player p) {
+		// add stuff
+	}
 
-    private void addPlayer(Scanner scan) {
-        System.out.print("Player name: ");
-        String name = scan.nextLine();
-        players.add(new Player(name));
-    }
+	public void addPlayers() { // add bank player
+		System.out.print("How many players? (max 4)");
+		int num = Integer.parseInt(scan.nextLine());
+		for (int i = 0; i < num; i++) {
+			addPlayer(scan);
+			if (i == 3) {
+				break;
+			}
+		}
+	}
 
-    public Space getSpace(String name) {
-        return spaces.get(name);
-    }
+	private void addPlayer(Scanner scan) {
+		System.out.print("Player name: ");
+		String name = scan.nextLine();
+		players.add(new Player(name));
+	}
 
-    public Space getSpace(int spot) {
-        return spaceSpots.get(spot);
-    }
+	public Space getSpace(String name) {
+		return spaces.get(name);
+	}
 
-    void addSpaces(String fileName) throws FileNotFoundException {      //all the rents and board setup nonsense i don't really want to do
-        File space = new File(fileName);
-        int spot = 0;
-        io = new Scanner(space);
-        while (io.hasNextLine()) {
+	public Space getSpace(int spot) {
+		return spaceSpots.get(spot);
+	}
 
-            String[] line = io.nextLine().split(",");
-            switch (line[1]) {
-                case "s":
-                    int[] rents = Arrays.stream(line[3].split(" ")).mapToInt(Integer::parseInt).toArray();
-                    this.spaces.put(line[0], new Street(line[0], spot, Integer.parseInt(line[2]), rents, Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6])));
-                    spaceSpots.add(this.spaces.get(line[0]));
-                    monopolyNumbers.set(Integer.parseInt(line[6]), monopolyNumbers.get(Integer.parseInt(line[6])) + 1);
-                    break;
-                case "cc":
-                case "c":
-                    this.spaces.put(line[0], new CardSpace(line[0], spot, line[1]));
-                    spaceSpots.add(this.spaces.get(line[0]));
-                    break;
-                case "r":
-                    this.spaces.put(line[0], new Railroad(line[0], spot, Integer.parseInt(line[2]), new int[]{50, 100, 150, 200}, 100));
-                    spaceSpots.add(this.spaces.get(line[0]));
-                    break;
-                case "u":
-                    Utility u = new Utility(line[0], spot, Integer.parseInt(line[2]), new int[]{4, 10}, 75);
-                    this.spaces.put(line[0], u);
-                    spaceSpots.add(u);
-                    break;
-                case "g":
-                case "gj":
-                    this.spaces.put(line[0], new Jail(line[0], spot));
-                    spaceSpots.add(this.spaces.get(line[0]));
-                    break;
-                case "j":
-                    this.spaces.put("Jail", new Jail("Jail", spot));
-                    spaceSpots.add(this.spaces.get("Jail"));
-                    break;
-                case "i":
-                case "l":
-                    this.spaces.put(line[0], new TaxSpace(line[0], spot, line[1]));
-                    spaceSpots.add(this.spaces.get(line[0]));
-                    break;
-                case "f":
-                    this.spaces.put(line[0], new FreeParking(line[0], spot));
-                    spaceSpots.add(this.spaces.get(line[0]));
-                    break;
-            }
-            spot++;
-        }
-        io.close();
-        System.out.println(spaceSpots);
-    }
+	void addSpaces(String fileName) throws FileNotFoundException { // all the rents and board setup nonsense i don't
+																	// really want to do
+		File space = new File(fileName);
+		int spot = 0;
+		io = new Scanner(space);
+		while (io.hasNextLine()) {
 
-    public void rollForTurnOrder() {
-        
-        ArrayList<Player> tied = (ArrayList<Player>) players.clone();
-        int max;
-        while (tied.size() > 1) {
-            System.out.println("Players " + tied + " rolling for turn order:");
-            max = 0;
-            for (Player p : tied) {
-                p.roll(scan);
-                System.out.println("Player " + p + " rolled a " + p.lastRoll());
-                if (p.lastRoll() > max) {
-                    max = p.lastRoll();
-                }
-            }
-            for (int i = 0; i < tied.size(); i++) {
-                if (tied.get(i).lastRoll() < max) {
-                    tied.remove(tied.get(i));
-                    i--;
-                }
-            }
-        }
-        int firstPlayer = players.indexOf(tied.get(0));
-        for (int turn = 0; turn < players.size(); turn++) {
-            players.get(firstPlayer % players.size()).setTurnOrder(turn);
-            firstPlayer += 1;
-        }
-        Collections.sort(players);
-        System.out.println("Turn order: " + players);
-    }
+			String[] line = io.nextLine().split(",");
+			switch (line[1]) {
+			case "s":
+				int[] rents = Arrays.stream(line[3].split(" ")).mapToInt(Integer::parseInt).toArray();
+				this.spaces.put(line[0], new Street(line[0], spot, Integer.parseInt(line[2]), rents,
+						Integer.parseInt(line[4]), Integer.parseInt(line[5]), Integer.parseInt(line[6])));
+				spaceSpots.add(this.spaces.get(line[0]));
+				monopolyNumbers.set(Integer.parseInt(line[6]), monopolyNumbers.get(Integer.parseInt(line[6])) + 1);
+				break;
+			case "cc":
+			case "c":
+				this.spaces.put(line[0], new CardSpace(line[0], spot, line[1]));
+				spaceSpots.add(this.spaces.get(line[0]));
+				break;
+			case "r":
+				this.spaces.put(line[0],
+						new Railroad(line[0], spot, Integer.parseInt(line[2]), new int[] { 50, 100, 150, 200 }, 100));
+				spaceSpots.add(this.spaces.get(line[0]));
+				break;
+			case "u":
+				Utility u = new Utility(line[0], spot, Integer.parseInt(line[2]), new int[] { 4, 10 }, 75);
+				this.spaces.put(line[0], u);
+				spaceSpots.add(u);
+				break;
+			case "g":
+			case "gj":
+				this.spaces.put(line[0], new Jail(line[0], spot, "gj"));
+				spaceSpots.add(this.spaces.get(line[0]));
+				break;
+			case "j":
+				this.spaces.put("Jail", new Jail("Jail", spot, "j"));
+				spaceSpots.add(this.spaces.get("Jail"));
+				Jail.setSpot(spot);
+				break;
+			case "i":
+			case "l":
+				this.spaces.put(line[0], new TaxSpace(line[0], spot, line[1]));
+				spaceSpots.add(this.spaces.get(line[0]));
+				break;
+			case "f":
+				this.spaces.put(line[0], new FreeParking(line[0], spot));
+				spaceSpots.add(this.spaces.get(line[0]));
+				break;
+			}
+			spot++;
+		}
+		io.close();
+		System.out.println(spaceSpots);
+	}
 
-    /*public void setTurnOrder() {                          ((obsolete))
-        int first = Roller.whoGoesFirst(players.size());
-        int i = first;
+	public void rollForTurnOrder() {
 
-        for (int turn = 0; turn < players.size(); turn++) {
-            players.get(i % players.size()).setTurnOrder(turn);
+		ArrayList<Player> tied = (ArrayList<Player>) players.clone();
+		int max;
+		while (tied.size() > 1) {
+			System.out.println("Players " + tied + " rolling for turn order:");
+			max = 0;
+			for (Player p : tied) {
+				p.roll(scan);
+				System.out.println("Player " + p + " rolled a " + p.lastRoll());
+				if (p.lastRoll() > max) {
+					max = p.lastRoll();
+				}
+			}
+			for (int i = 0; i < tied.size(); i++) {
+				if (tied.get(i).lastRoll() < max) {
+					tied.remove(tied.get(i));
+					i--;
+				}
+			}
+		}
+		int firstPlayer = players.indexOf(tied.get(0));
+		for (int turn = 0; turn < players.size(); turn++) {
+			players.get(firstPlayer % players.size()).setTurnOrder(turn);
+			firstPlayer += 1;
+		}
+		Collections.sort(players);
+		System.out.println("Turn order: " + players);
+	}
 
-            i += 1;
+	/*
+	 * public void setTurnOrder() { ((obsolete)) int first =
+	 * Roller.whoGoesFirst(players.size()); int i = first;
+	 * 
+	 * for (int turn = 0; turn < players.size(); turn++) { players.get(i %
+	 * players.size()).setTurnOrder(turn);
+	 * 
+	 * i += 1;
+	 * 
+	 * } Collections.sort(players); System.out.println("Turn order: " + players); }
+	 */
+	void end() {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 
-        }
-        Collections.sort(players);
-        System.out.println("Turn order: " + players);
-    }*/
-    void end() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	private void addMonopolyNumbers() {
+		for (int i = 0; i < 40; i++) {
+			monopolyNumbers.add(0);
+		}
+	}
 
-    private void addMonopolyNumbers() {
-        for (int i = 0; i < 40; i++) {
-            monopolyNumbers.add(0);
-        }
-    }
+	public int jailSpot() {
+		return jailSpot;
+	}
 
 }

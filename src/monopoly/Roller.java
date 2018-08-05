@@ -14,8 +14,11 @@ import java.util.Random;
 public class Roller {
     public static Random r = new Random();
     
-    public static int roll(){
-        return r.nextInt(5) + r.nextInt(5) + 2;
+    public static int[] roll(){
+        int[] dice = {r.nextInt(5) + 1, r.nextInt(5) + 1};
+    	int[] test = {6, 4};
+        return test;
+    	//return dice;
     }
     public static int whoGoesFirst(int players){
         return r.nextInt(players);
