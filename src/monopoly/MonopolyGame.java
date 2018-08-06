@@ -45,6 +45,10 @@ class MonopolyGame {
 			System.out.println("setup file not found; quitting...");
 			System.exit(0);
 		}
+		players.get(0).buyProperty((Property)spaces.get("Oriental Ave."));
+		players.get(0).buyProperty((Property)spaces.get("Connecticut Ave."));
+		players.get(0).buyProperty((Property)spaces.get("Vermont Ave."));
+
 		rollForTurnOrder();
 	}
 

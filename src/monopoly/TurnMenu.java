@@ -106,13 +106,16 @@ public class TurnMenu {
                     }
                     System.out.println(chosen + " has " + h);
                     System.out.println("You have $" + p.money());
+                    count = 1;
                     if (chosen.houses() != 5) {
                         System.out.println("1: buy a house for $" + chosen.housePrice());
+                        count++;
                     }
                     if (chosen.houses() != 0) {
                         System.out.println("2: sell a house for $" + chosen.housePrice() / 2);
+                        count++;
                     }
-                    System.out.println("3: Go back");
+                    System.out.println(count + ": Go back");
                     try {
                         choice = Integer.parseInt(scan.nextLine());
                         if (choice == count) {
