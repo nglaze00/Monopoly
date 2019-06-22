@@ -1,2 +1,2 @@
 # Monopoly
-basic Java practice
+Backend logic for Monopoly; small project to practice Java OOP
